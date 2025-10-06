@@ -45,6 +45,36 @@
             </div>
         </section>
 
+        <section id="loyalty-program" class="card">
+            <h2>NTNUExpress Lojalitetsprogram</h2>
+            <div class="loyalty-info">
+                <div class="points-display">
+                    <div class="points-circle">
+                        <span id="current-points">0</span>
+                        <span class="points-label">poeng</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <p class="points-text">Du trenger <span id="points-needed">5</span> poeng til neste belønning!</p>
+                </div>
+                <div class="rewards-info">
+                    <h3>Belønninger:</h3>
+                    <div class="reward-item">
+                        <span class="reward-icon">🥤</span>
+                        <span class="reward-text">0,33L Cola (500 poeng)</span>
+                        <button id="redeem-cola" class="btn reward-btn disabled" disabled>Ikke tilgjengelig</button>
+                    </div>
+                </div>
+                <div class="account-section">
+                    <p>Logg inn med e-post for å lagre dine poeng:</p>
+                    <input type="email" id="user-email" placeholder="din@email.no" class="email-input">
+                    <button id="login-btn" class="btn login-btn">Logg inn</button>
+                    <p id="login-status" class="login-status"></p>
+                </div>
+            </div>
+        </section>
+
         <section id="tomorrow-orders" class="card">
             <h2>Bestill for i morgen</h2>
             <div class="tomorrow-info">

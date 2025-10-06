@@ -219,6 +219,182 @@ main {
 
 /* Tomorrow buttons are always available - no disabled styles needed */
 
+/* Loyalty Program Styles */
+#loyalty-program {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: 2px solid #ff9800;
+}
+
+.loyalty-info {
+    text-align: center;
+}
+
+.points-display {
+    margin-bottom: 2rem;
+}
+
+.points-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 1rem;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+}
+
+.points-circle #current-points {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.points-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    margin: 1rem 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff9800, #f57c00);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.points-text {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+.rewards-info {
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.rewards-info h3 {
+    color: #00509e;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.reward-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 1rem;
+}
+
+.reward-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+}
+
+.reward-text {
+    flex: 1;
+    font-weight: 500;
+    color: #333;
+}
+
+.reward-btn {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.reward-btn:hover:not(.disabled) {
+    background: linear-gradient(135deg, #f57c00, #ef6c00);
+    transform: translateY(-1px);
+}
+
+.reward-btn.disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.account-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.account-section p {
+    margin-bottom: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.email-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.email-input:focus {
+    outline: none;
+    border-color: #00509e;
+}
+
+.login-btn {
+    background: linear-gradient(135deg, #00509e, #003d7a);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, #003d7a, #002c5a);
+    transform: translateY(-1px);
+}
+
+.login-status {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.login-status.success {
+    color: #4caf50;
+}
+
+.login-status.error {
+    color: #f44336;
+}
+
 /* Confirmation section */
 .confirmation {
     background: linear-gradient(135deg, #f8fbff, #e8f4fd);

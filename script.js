@@ -50,6 +50,15 @@ const closeModalBtn = document.getElementById('close-modal');
 const tomorrowMealNameEl = document.getElementById('tomorrow-meal-name');
 const tomorrowMealDescriptionEl = document.getElementById('tomorrow-meal-description');
 
+// Loyalty program elements
+const currentPointsEl = document.getElementById('current-points');
+const progressFillEl = document.getElementById('progress-fill');
+const pointsNeededEl = document.getElementById('points-needed');
+const redeemColaBtn = document.getElementById('redeem-cola');
+const userEmailInput = document.getElementById('user-email');
+const loginBtn = document.getElementById('login-btn');
+const loginStatusEl = document.getElementById('login-status');
+
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     loadTodaysMeal();
@@ -58,6 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateButtonStates(); // Add this to disable past times
     setupEventListeners();
     addFadeInEffect();
+    initializeLoyaltyProgram();
     
     // Update buttons every minute
     setInterval(updateTomorrowButtons, 60000);
@@ -310,6 +320,8 @@ function simulateVippsApp() {
     
     document.getElementById('close-modal').addEventListener('click', function() {
         hideVippsModal();
+        // Add loyalty points for completed purchase
+        addPoints(100);
         // Reset the order process
         setTimeout(() => {
             confirmationSection.classList.add('hidden');
@@ -424,3 +436,203 @@ if ('ontouchstart' in window) {
     `;
     document.head.appendChild(style);
 }
+
+// Loyalty Program Functions
+function initializeLoyaltyProgram() {
+    loadLoyaltyData();
+    updateLoyaltyDisplay();
+    setupLoyaltyEventListeners();
+}
+
+function loadLoyaltyData() {
+    // Load points from localStorage
+    const savedData = localStorage.getItem('ntnuexpress-loyalty');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        window.loyaltyData = {
+            points: data.points || 0,
+            email: data.email || '',
+            totalPurchases: data.totalPurchases || 0,
+            redeemedRewards: data.redeemedRewards || []
+        };
+    } else {
+        window.loyaltyData = {
+            points: 0,
+            email: '',
+            totalPurchases: 0,
+            redeemedRewards: []
+        };
+    }
+}
+
+function saveLoyaltyData() {
+    localStorage.setItem('ntnuexpress-loyalty', JSON.stringify(window.loyaltyData));
+}
+
+function updateLoyaltyDisplay() {
+    if (!currentPointsEl || !progressFillEl || !pointsNeededEl) return;
+    
+    const points = window.loyaltyData.points;
+    const pointsNeeded = 500 - (points % 500);
+    const progress = (points % 500) * 0.2; // 0.2% per point (100 points = 20%)
+    
+    currentPointsEl.textContent = points;
+    progressFillEl.style.width = `${progress}%`;
+    pointsNeededEl.textContent = pointsNeeded;
+    
+    // Update redeem button
+    if (redeemColaBtn) {
+        if (points >= 500 && !window.loyaltyData.redeemedRewards.includes('cola')) {
+            redeemColaBtn.disabled = false;
+            redeemColaBtn.classList.remove('disabled');
+            redeemColaBtn.textContent = 'Løs inn';
+        } else {
+            redeemColaBtn.disabled = true;
+            redeemColaBtn.classList.add('disabled');
+            redeemColaBtn.textContent = 'Ikke tilgjengelig';
+        }
+    }
+    
+    // Update email field if logged in
+    if (userEmailInput && window.loyaltyData.email) {
+        userEmailInput.value = window.loyaltyData.email;
+    }
+}
+
+function addPoints(pointsToAdd) {
+    window.loyaltyData.points += pointsToAdd;
+    window.loyaltyData.totalPurchases += 1;
+    saveLoyaltyData();
+    updateLoyaltyDisplay();
+    
+    // Show points notification
+    showPointsNotification(pointsToAdd);
+}
+
+function showPointsNotification(points) {
+    const notification = document.createElement('div');
+    notification.className = 'points-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">🎉</span>
+            <span class="notification-text">+${points} poeng!</span>
+        </div>
+    `;
+    
+    // Add notification styles
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+function setupLoyaltyEventListeners() {
+    // Login button
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function() {
+            const email = userEmailInput.value.trim();
+            if (email && email.includes('@')) {
+                window.loyaltyData.email = email;
+                saveLoyaltyData();
+                loginStatusEl.textContent = `Logget inn som: ${email}`;
+                loginStatusEl.className = 'login-status success';
+            } else {
+                loginStatusEl.textContent = 'Vennligst skriv inn en gyldig e-postadresse';
+                loginStatusEl.className = 'login-status error';
+            }
+        });
+    }
+    
+    // Redeem cola button
+    if (redeemColaBtn) {
+        redeemColaBtn.addEventListener('click', function() {
+            if (window.loyaltyData.points >= 500 && !window.loyaltyData.redeemedRewards.includes('cola')) {
+                window.loyaltyData.points -= 500;
+                window.loyaltyData.redeemedRewards.push('cola');
+                saveLoyaltyData();
+                updateLoyaltyDisplay();
+                
+                // Show redemption notification
+                showRedemptionNotification('cola');
+            }
+        });
+    }
+}
+
+function showRedemptionNotification(reward) {
+    const notification = document.createElement('div');
+    notification.className = 'redemption-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">🥤</span>
+            <span class="notification-text">Gratulerer! Du har løst inn 0,33L Cola!</span>
+        </div>
+    `;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 4000);
+}
+
+// Add CSS animations for notifications
+const notificationStyles = document.createElement('style');
+notificationStyles.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(notificationStyles);
