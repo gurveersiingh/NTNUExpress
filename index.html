@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTNUExpress — av studenter for studenter</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>NTNUExpress</h1>
+        <p class="tagline">av studenter for studenter</p>
+    </header>
+
+    <main>
+        <section id="today-meal" class="card">
+            <h2>Dagens rett</h2>
+            <div id="meal-content">
+                <div class="meal-info">
+                    <h3 id="meal-name">Laster...</h3>
+                    <p id="meal-description">En deilig og mettende rett laget med kjærlighet</p>
+                </div>
+                <div class="price">
+                    <span class="price-amount">49 kr</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="order-times" class="card">
+            <h2>Velg bestillingstidspunkt</h2>
+            <div class="time-buttons">
+                <button class="btn time-btn" data-time="10:15">
+                    <span class="time">10:15</span>
+                    <span class="status">Morgenbestilling</span>
+                </button>
+                <button class="btn time-btn" data-time="12:15">
+                    <span class="time">12:15</span>
+                    <span class="status">Lunsjbestilling</span>
+                </button>
+                <button class="btn time-btn" data-time="14:15">
+                    <span class="time">14:15</span>
+                    <span class="status">Ettermiddagsbestilling</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="tomorrow-orders" class="card">
+            <h2>Bestill for i morgen</h2>
+            <div class="tomorrow-info">
+                <p class="tomorrow-date">Morgendagens rett: <span id="tomorrow-meal-name"></span></p>
+                <p class="tomorrow-description" id="tomorrow-meal-description"></p>
+            </div>
+            <div class="time-buttons tomorrow-buttons">
+                <button class="btn time-btn tomorrow-btn" data-time="10:15" data-day="tomorrow">
+                    <span class="time">10:15</span>
+                    <span class="status">Morgenbestilling</span>
+                </button>
+                <button class="btn time-btn tomorrow-btn" data-time="12:15" data-day="tomorrow">
+                    <span class="time">12:15</span>
+                    <span class="status">Lunsjbestilling</span>
+                </button>
+                <button class="btn time-btn tomorrow-btn" data-time="14:15" data-day="tomorrow">
+                    <span class="time">14:15</span>
+                    <span class="status">Ettermiddagsbestilling</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="order-confirmation" class="card confirmation hidden">
+            <h2>Bestilling bekreftet!</h2>
+            <div class="confirmation-content">
+                <p>Du har valgt <span id="selected-time"></span></p>
+                <p class="order-details">Dagens rett: <span id="selected-meal"></span></p>
+                <p class="price-confirmation">Pris: 49 kr</p>
+                <button id="vipps-btn" class="btn vipps-btn">
+                    <span class="vipps-logo">💳</span>
+                    Betal med Vipps
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="vipps-info">
+            <div class="vipps-logo-large">💳</div>
+            <p>Betal på forhånd via Vipps</p>
+            <p class="contact">Kontakt: ntnuexpress@student.ntnu.no</p>
+        </div>
+        <div class="student-banner">
+            <p>"Billig, mett, fornøyd — NTNUExpress!"</p>
+        </div>
+    </footer>
+
+    <!-- Vipps Payment Modal -->
+    <div id="vipps-modal" class="modal hidden">
+        <div class="modal-content">
+            <!-- Content will be dynamically generated -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
