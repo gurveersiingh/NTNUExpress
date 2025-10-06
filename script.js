@@ -57,6 +57,7 @@ const pointsNeededEl = document.getElementById('points-needed');
 const redeemColaBtn = document.getElementById('redeem-cola');
 const userEmailInput = document.getElementById('user-email');
 const loginBtn = document.getElementById('login-btn');
+const logoutBtn = document.getElementById('logout-btn');
 const loginStatusEl = document.getElementById('login-status');
 
 // Initialize the app
@@ -318,10 +319,10 @@ function simulateVippsApp() {
         </div>
     `;
     
-    document.getElementById('close-modal').addEventListener('click', function() {
+    document.getElementById('close-modal').addEventListener('click', async function() {
         hideVippsModal();
         // Add loyalty points for completed purchase
-        addPoints(100);
+        await addPoints(100);
         // Reset the order process
         setTimeout(() => {
             confirmationSection.classList.add('hidden');
@@ -439,10 +440,111 @@ if ('ontouchstart' in window) {
 
 // Loyalty Program Functions
 function initializeLoyaltyProgram() {
-    loadLoyaltyData();
-    updateLoyaltyDisplay();
+    // Wait for Firebase to be available
+    if (window.firebase) {
+        setupFirebaseAuth();
+    } else {
+        // Fallback to localStorage if Firebase not available
+        loadLoyaltyData();
+        updateLoyaltyDisplay();
+        setupLoyaltyEventListeners();
+    }
+}
+
+function setupFirebaseAuth() {
+    const { auth, onAuthStateChanged } = window.firebase;
+    
+    // Listen for auth state changes
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // User is signed in (anonymously)
+            console.log('User signed in:', user.uid);
+            loadLoyaltyDataFromFirebase(user.uid);
+        } else {
+            // User is signed out
+            console.log('User signed out');
+            loadLoyaltyData(); // Fallback to localStorage
+        }
+    });
+    
     setupLoyaltyEventListeners();
 }
+
+async function loadLoyaltyDataFromFirebase(userId) {
+    try {
+        const { db, doc, getDoc } = window.firebase;
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            window.loyaltyData = {
+                points: data.points || 0,
+                email: data.email || '',
+                totalPurchases: data.totalPurchases || 0,
+                redeemedRewards: data.redeemedRewards || []
+            };
+        } else {
+            // Create new user document
+            window.loyaltyData = {
+                points: 0,
+                email: '',
+                totalPurchases: 0,
+                redeemedRewards: []
+            };
+            await saveLoyaltyDataToFirebase(userId);
+        }
+        
+        updateLoyaltyDisplay();
+    } catch (error) {
+        console.error('Error loading loyalty data:', error);
+        // Fallback to localStorage
+        loadLoyaltyData();
+    }
+}
+
+async function saveLoyaltyDataToFirebase(userId) {
+    try {
+        const { db, doc, setDoc } = window.firebase;
+        await setDoc(doc(db, 'users', userId), {
+            points: window.loyaltyData.points,
+            email: window.loyaltyData.email,
+            totalPurchases: window.loyaltyData.totalPurchases,
+            redeemedRewards: window.loyaltyData.redeemedRewards,
+            lastUpdated: new Date()
+        });
+    } catch (error) {
+        console.error('Error saving loyalty data:', error);
+        // Fallback to localStorage
+        saveLoyaltyData();
+    }
+}
+
+
+function updateLoginUI(isLoggedIn, email = '') {
+    if (isLoggedIn) {
+        if (userEmailInput) userEmailInput.value = email;
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (logoutBtn) {
+            logoutBtn.style.display = 'block';
+            logoutBtn.classList.remove('hidden');
+        }
+        if (loginStatusEl) {
+            loginStatusEl.textContent = `Logget inn som: ${email}`;
+            loginStatusEl.className = 'login-status success';
+        }
+    } else {
+        if (loginBtn) loginBtn.style.display = 'block';
+        if (logoutBtn) {
+            logoutBtn.style.display = 'none';
+            logoutBtn.classList.add('hidden');
+        }
+        if (loginStatusEl) {
+            loginStatusEl.textContent = '';
+            loginStatusEl.className = 'login-status';
+        }
+    }
+}
+
 
 function loadLoyaltyData() {
     // Load points from localStorage
@@ -499,10 +601,18 @@ function updateLoyaltyDisplay() {
     }
 }
 
-function addPoints(pointsToAdd) {
+async function addPoints(pointsToAdd) {
     window.loyaltyData.points += pointsToAdd;
     window.loyaltyData.totalPurchases += 1;
-    saveLoyaltyData();
+    
+    // Save to Firebase if user is logged in
+    if (window.firebase && window.firebase.auth.currentUser) {
+        await saveLoyaltyDataToFirebase(window.firebase.auth.currentUser.uid);
+    } else {
+        // Fallback to localStorage
+        saveLoyaltyData();
+    }
+    
     updateLoyaltyDisplay();
     
     // Show points notification
@@ -545,17 +655,55 @@ function showPointsNotification(points) {
 }
 
 function setupLoyaltyEventListeners() {
-    // Login button
+    // Login button - simplified email-only login with Firebase Anonymous Auth
     if (loginBtn) {
-        loginBtn.addEventListener('click', function() {
+        loginBtn.addEventListener('click', async function() {
             const email = userEmailInput.value.trim();
-            if (email && email.includes('@')) {
+            
+            if (!email || !email.includes('@')) {
+                loginStatusEl.textContent = 'Vennligst skriv inn en gyldig e-postadresse';
+                loginStatusEl.className = 'login-status error';
+                return;
+            }
+            
+            try {
+                // Sign in anonymously with Firebase
+                const { auth, signInAnonymously } = window.firebase;
+                await signInAnonymously(auth);
+                
+                // Store email in loyalty data
                 window.loyaltyData.email = email;
-                saveLoyaltyData();
+                
+                // Save to Firebase
+                if (window.firebase.auth.currentUser) {
+                    await saveLoyaltyDataToFirebase(window.firebase.auth.currentUser.uid);
+                }
+                
+                // Update UI to show logged in state
+                updateLoginUI(true, email);
+                
                 loginStatusEl.textContent = `Logget inn som: ${email}`;
                 loginStatusEl.className = 'login-status success';
-            } else {
-                loginStatusEl.textContent = 'Vennligst skriv inn en gyldig e-postadresse';
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                loginStatusEl.textContent = 'Innlogging feilet. Prøv igjen.';
+                loginStatusEl.className = 'login-status error';
+            }
+        });
+    }
+    
+    // Logout button
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async function() {
+            try {
+                const { auth, signOut } = window.firebase;
+                await signOut(auth);
+                loginStatusEl.textContent = 'Du er nå logget ut.';
+                loginStatusEl.className = 'login-status';
+            } catch (error) {
+                console.error('Logout error:', error);
+                loginStatusEl.textContent = 'Utlogging feilet.';
                 loginStatusEl.className = 'login-status error';
             }
         });
@@ -563,11 +711,19 @@ function setupLoyaltyEventListeners() {
     
     // Redeem cola button
     if (redeemColaBtn) {
-        redeemColaBtn.addEventListener('click', function() {
+        redeemColaBtn.addEventListener('click', async function() {
             if (window.loyaltyData.points >= 500 && !window.loyaltyData.redeemedRewards.includes('cola')) {
                 window.loyaltyData.points -= 500;
                 window.loyaltyData.redeemedRewards.push('cola');
-                saveLoyaltyData();
+                
+                // Save to Firebase if user is logged in
+                if (window.firebase && window.firebase.auth.currentUser) {
+                    await saveLoyaltyDataToFirebase(window.firebase.auth.currentUser.uid);
+                } else {
+                    // Fallback to localStorage
+                    saveLoyaltyData();
+                }
+                
                 updateLoyaltyDisplay();
                 
                 // Show redemption notification

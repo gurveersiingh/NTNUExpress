@@ -6,6 +6,31 @@
     <title>NTNUExpress — av studenter for studenter</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Firebase configuration - your actual config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBD6CnhIld2eMcvVxiHOWCsR5iGnG080bE",
+            authDomain: "ntnuexpress.firebaseapp.com",
+            projectId: "ntnuexpress",
+            storageBucket: "ntnuexpress.firebasestorage.app",
+            messagingSenderId: "483753235647",
+            appId: "1:483753235647:web:c970cbfe22ab38482fa20a"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Make Firebase available globally
+        window.firebase = { auth, db, signInAnonymously, onAuthStateChanged, signOut, doc, setDoc, getDoc, updateDoc };
+    </script>
 </head>
 <body>
     <header>
@@ -69,7 +94,10 @@
                 <div class="account-section">
                     <p>Logg inn med e-post for å lagre dine poeng:</p>
                     <input type="email" id="user-email" placeholder="din@email.no" class="email-input">
-                    <button id="login-btn" class="btn login-btn">Logg inn</button>
+                    <div class="login-buttons">
+                        <button id="login-btn" class="btn login-btn">Logg inn</button>
+                        <button id="logout-btn" class="btn logout-btn hidden">Logg ut</button>
+                    </div>
                     <p id="login-status" class="login-status"></p>
                 </div>
             </div>
